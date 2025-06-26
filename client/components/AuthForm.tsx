@@ -19,6 +19,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { createAccount, signInUser } from "@/lib/actions/user.actions";
 import OtpModal from "@/components/OTPModal";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 type FormType = "sign-in" | "sign-up";
 
@@ -36,6 +38,8 @@ const AuthForm = ({ type }: { type: FormType }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [accountId, setAccountId] = useState(null);
+  const { toast } = useToast();
+  const router = useRouter()
 
   const formSchema = authFormSchema(type);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -51,15 +55,35 @@ const AuthForm = ({ type }: { type: FormType }) => {
     setErrorMessage("");
 
     try {
-      const user =
+      const userAccountId =
         type === "sign-up"
           ? await createAccount({
-              fullName: values.fullName || "",
-              email: values.email,
-            })
+            fullName: values.fullName || "",
+            email: values.email,
+          })
           : await signInUser({ email: values.email });
 
-      setAccountId(user.accountId);
+      console.log(userAccountId)
+
+      if (userAccountId) {
+        setAccountId(userAccountId);
+      }
+      else {
+        toast({
+          description: (
+            <p className="body-2 text-white">
+              User already exists, kindly login using email!
+            </p>
+          ),
+          className: "error-toast",
+        });
+
+        setTimeout(() => {
+          router.push('/sign-in');
+        }, 500);
+
+        return;
+      }
     } catch {
       setErrorMessage("Failed to create account. Please try again.");
     } finally {

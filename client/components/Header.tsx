@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Search from "@/components/Search";
 import FileUploader from "@/components/FileUploader";
-import { signOutUser } from "@/lib/actions/user.actions";
+// import { signOutUser } from "@/lib/actions/user.actions";
 
 const Header = ({
   userId,
@@ -17,14 +17,15 @@ const Header = ({
       <Search />
       <div className="header-wrapper">
         <FileUploader ownerId={userId} accountId={accountId} />
-        <form
-          action={async () => {
-            "use server";
-
-            await signOutUser();
-          }}
-        >
-          <Button type="submit" className="sign-out-button">
+        <form>
+          <Button
+            onClick={() => {
+              localStorage.removeItem('session_id')
+              localStorage.removeItem('token')
+            }}
+            type="submit"
+            className="sign-out-button"
+          >
             <Image
               src="/assets/icons/logout.svg"
               alt="logo"

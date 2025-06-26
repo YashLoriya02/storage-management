@@ -44,7 +44,7 @@ export const getCurrentUser = async (req: Request<{ accountId: string }, {}, {}>
             return
         }
 
-        const user = await User.findOne({ accountId });
+        const user = await User.findById(accountId);
         if (!user) {
             res.status(404).json({ error: 'User not found' });
             return
@@ -111,16 +111,38 @@ export const sendOTP = async (req: Request<{}, {}, { email: string }>, res: Resp
     }
 };
 
-export const loginUser = async (req: Request<{}, {}, { email: string, otp: string }>, res: Response) => {
+export const getUserByEmail = async (req: Request<{}, {}, { email: string }>, res: Response) => {
     try {
-        const { email, otp } = req.body;
+        const { email } = req.body;
 
-        if (!email || !otp) {
-            res.status(400).json({ error: 'Email and OTP are required' });
+        if (!email) {
+            res.status(400).json({ error: 'Email is required' });
             return
         }
 
         const user = await User.findOne({ email });
+        if (!user) {
+            res.status(401).json({ error: 'User not found' });
+            return
+        }
+
+        res.status(200).json({ accountId: user.accountId });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+export const loginUser = async (req: Request<{}, {}, { accountId: string, otp: string }>, res: Response) => {
+    try {
+        const { accountId, otp } = req.body;
+
+        if (!accountId || !otp) {
+            res.status(400).json({ error: 'Email and OTP are required' });
+            return
+        }
+
+        const user = await User.findOne({ accountId });
         if (!user || user.otp !== otp) {
             res.status(401).json({ error: 'Invalid email or OTP' });
             return
@@ -135,7 +157,7 @@ export const loginUser = async (req: Request<{}, {}, { email: string, otp: strin
             { expiresIn: '30d' }
         );
 
-        res.status(200).json({ token, accountId: user.accountId });
+        res.status(200).json({ token, accountId: user.accountId, $id: user._id });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

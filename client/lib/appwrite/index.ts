@@ -9,20 +9,24 @@ export const createSessionClient = async () => {
     .setEndpoint(appwriteConfig.endpointUrl)
     .setProject(appwriteConfig.projectId);
 
-  const session = (await cookies()).get("appwrite-session");
+  const session = (await cookies()).get("session_id");
+  // const session = localStorage.getItem('session_id')
+  if (!session) throw new Error("No session");
 
-  if (!session || !session.value) throw new Error("No session");
+  // client.setSession(session.value);
 
-  client.setSession(session.value);
+  // return {
+  //   get account() {
+  //     return new Account(client);
+  //   },
+  //   get databases() {
+  //     return new Databases(client);
+  //   },
+  // };
 
   return {
-    get account() {
-      return new Account(client);
-    },
-    get databases() {
-      return new Databases(client);
-    },
-  };
+    session_id: session.value
+  }
 };
 
 export const createAdminClient = async () => {
