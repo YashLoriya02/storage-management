@@ -1,13 +1,13 @@
 "use server";
 
-import { createAdminClient, createSessionClient } from "@/lib/appwrite";
-import { appwriteConfig } from "@/lib/appwrite/config";
-import { Query, ID } from "node-appwrite";
-import { parseStringify } from "@/lib/utils";
-import { cookies } from "next/headers";
 import { avatarPlaceholderUrl } from "@/constants";
-import { redirect } from "next/navigation";
-import Cookies from "js-cookie";
+import { createSessionClient } from "@/lib/appwrite";
+import { parseStringify } from "@/lib/utils";
+
+const handleError = (error: unknown, message: string) => {
+  console.log(error, message);
+  throw error;
+};
 
 const getUserByEmail = async (email: string) => {
   try {
@@ -30,11 +30,6 @@ const getUserByEmail = async (email: string) => {
     handleError(error, "Failed to send email OTP");
     return null
   }
-};
-
-const handleError = (error: unknown, message: string) => {
-  console.log(error, message);
-  throw error;
 };
 
 export const sendEmailOTP = async ({ email }: { email: string }) => {
@@ -111,20 +106,7 @@ export const verifySecret = async ({
 
 export const getCurrentUser = async () => {
   try {
-    const { session_id } = await createSessionClient();
-
-    // const result = await account.get();
-
-    // const user = await databases.listDocuments(
-    //   appwriteConfig.databaseId,
-    //   appwriteConfig.usersCollectionId,
-    //   [Query.equal("accountId", result.$id)],
-    // );
-
-    // if (user.total <= 0) return null;
-
-    // return parseStringify({});
-
+    const { session_id } = await createSessionClient()
     if (!session_id || session_id === "") {
       return null
     }
@@ -139,19 +121,6 @@ export const getCurrentUser = async () => {
     console.log(error);
   }
 };
-
-// export const signOutUser = async () => {
-//   const { account } = await createSessionClient();
-
-//   try {
-//     await account.deleteSession("current");
-//     (await cookies()).delete("appwrite-session");
-//   } catch (error) {
-//     handleError(error, "Failed to sign out user");
-//   } finally {
-//     redirect("/sign-in");
-//   }
-// };
 
 export const signInUser = async ({ email }: { email: string }) => {
   try {

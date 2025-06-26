@@ -10,22 +10,14 @@ export const createSessionClient = async () => {
     .setProject(appwriteConfig.projectId);
 
   const session = (await cookies()).get("session_id");
-  // const session = localStorage.getItem('session_id')
+  const token = (await cookies()).get("token");
+
   if (!session) throw new Error("No session");
-
-  // client.setSession(session.value);
-
-  // return {
-  //   get account() {
-  //     return new Account(client);
-  //   },
-  //   get databases() {
-  //     return new Databases(client);
-  //   },
-  // };
+  if (!token) throw new Error("No Token");
 
   return {
-    session_id: session.value
+    session_id: session.value,
+    token: token.value,
   }
 };
 
