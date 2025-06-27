@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  Label,
-  PolarGrid,
-  PolarRadiusAxis,
-  RadialBar,
-  RadialBarChart,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Label as RechartsLabel,
 } from "recharts";
 
 import {
@@ -15,84 +15,132 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { calculatePercentage, convertFileSize } from "@/lib/utils";
+import { ChartContainer, ChartConfig } from "@/components/ui/chart";
+import { convertFileSize } from "@/lib/utils";
+
+// Types
+interface ChartProps {
+  used?: number;
+}
+
+interface ChartData {
+  name: string;
+  value: number;
+}
+
+interface ViewBoxProps {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+  cx?: number;
+  cy?: number;
+}
+
+// Constants
+const TOTAL_STORAGE = 2 * 1024 * 1024 * 1024;
+const COLORS = ["#FFFFFFCC", "#ffffff44"];
 
 const chartConfig = {
-  size: {
-    label: "Size",
-  },
-  used: {
-    label: "Used",
-    color: "white",
-  },
+  size: { label: "Size" },
+  used: { label: "Used", color: "white" },
 } satisfies ChartConfig;
 
-export const Chart = ({ used = 0 }: { used: number }) => {
-  const chartData = [{ storage: "used", 10: used, fill: "white" }];
+export const Chart = ({ used = 0 }: ChartProps) => {
+  const rawPercentage = (used / TOTAL_STORAGE) * 100;
+  const percentageUsed = Math.min(
+    used > 0 ? Math.max(Number(rawPercentage.toFixed(2)), 0.01) : 0,
+    100
+  );
+
+  const data: ChartData[] = [
+    { name: "Used", value: percentageUsed },
+    { name: "Remaining", value: 100 - percentageUsed },
+  ];
+
+  const getCenterCoordinates = (viewBox: ViewBoxProps) => {
+    if (viewBox.cx !== undefined && viewBox.cy !== undefined) {
+      return { cx: viewBox.cx, cy: viewBox.cy };
+    }
+
+    const x = viewBox.x || 0;
+    const y = viewBox.y || 0;
+    const width = viewBox.width || 0;
+    const height = viewBox.height || 0;
+
+    return {
+      cx: x + width / 2,
+      cy: y + height / 2,
+    };
+  };
 
   return (
     <Card className="chart">
       <CardContent className="flex-1 p-0">
         <ChartContainer config={chartConfig} className="chart-container">
-          <RadialBarChart
-            data={chartData}
-            startAngle={90}
-            endAngle={Number(calculatePercentage(used)) + 90}
-            innerRadius={80}
-            outerRadius={110}
-          >
-            <PolarGrid
-              gridType="circle"
-              radialLines={false}
-              stroke="none"
-              className="polar-grid"
-              polarRadius={[86, 74]}
-            />
-            <RadialBar dataKey="storage" background cornerRadius={10} />
-            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-              <Label
-                content={({ viewBox }) => {
-                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={data}
+                innerRadius={80}
+                outerRadius={110}
+                startAngle={90}
+                endAngle={-270}
+                dataKey="value"
+                stroke="none"
+              >
+                {data.map((_, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                ))}
+
+                <RechartsLabel
+                  position="center"
+                  content={({ viewBox }) => {
+                    if (!viewBox) return null;
+
+                    const { cx, cy } = getCenterCoordinates(viewBox as ViewBoxProps);
+
                     return (
-                      <text
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                      >
-                        <tspan
-                          x={viewBox.cx}
-                          y={viewBox.cy}
+                      <g>
+                        <text
+                          x={cx}
+                          y={cy - 5}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="white"
+                          fontSize="24"
+                          fontWeight="bold"
                           className="chart-total-percentage"
                         >
-                          {used && calculatePercentage(used)
-                            ? calculatePercentage(used)
-                                .toString()
-                                .replace(/^0+/, "")
-                            : "0"}
-                          %
-                        </tspan>
-                        <tspan
-                          x={viewBox.cx}
-                          y={(viewBox.cy || 0) + 24}
-                          className="fill-white/70"
+                          {percentageUsed < 1 && percentageUsed > 0
+                            ? `${percentageUsed}%`
+                            : `${Math.round(percentageUsed)}%`
+                          }
+                        </text>
+                        <text
+                          x={cx}
+                          y={cy + 18}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          fill="rgba(255,255,255,0.8)"
+                          fontSize="14"
+                          fontWeight="500"
                         >
                           Space used
-                        </tspan>
-                      </text>
+                        </text>
+                      </g>
                     );
-                  }
-                }}
-              />
-            </PolarRadiusAxis>
-          </RadialBarChart>
+                  }}
+                />
+              </Pie>
+            </PieChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
       <CardHeader className="chart-details">
         <CardTitle className="chart-title">Available Storage</CardTitle>
         <CardDescription className="chart-description">
-          {used ? convertFileSize(used) : "2GB"} / 2GB
+          {used > 0 ? convertFileSize(used) : "0 B"} / {convertFileSize(TOTAL_STORAGE)}
         </CardDescription>
       </CardHeader>
     </Card>

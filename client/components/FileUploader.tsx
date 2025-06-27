@@ -50,6 +50,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
               setFiles((prevFiles) =>
                 prevFiles.filter((f) => f.name !== file.name),
               );
+              
             }
           },
         );

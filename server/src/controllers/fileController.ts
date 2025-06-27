@@ -12,12 +12,13 @@ interface AddFileForm {
     owner: mongoose.Types.ObjectId,
     accountId: UUID,
     users: Array<any>,
-    bucketFileId: string
+    bucketFileId: string,
+    bucketId: string
 }
 
 export const addFiles = async (req: Request<{}, {}, AddFileForm>, res: Response) => {
     try {
-        const { type, name, url, extension, size, owner, accountId, users, bucketFileId } = req.body;
+        const { type, name, url, extension, size, owner, accountId, users, bucketFileId, bucketId } = req.body;
 
         const fileDoc = new File({
             type,
@@ -29,6 +30,7 @@ export const addFiles = async (req: Request<{}, {}, AddFileForm>, res: Response)
             accountId,
             users: users || [],
             bucketFileId,
+            bucketId,
         });
 
         await fileDoc.save();
@@ -41,7 +43,7 @@ export const addFiles = async (req: Request<{}, {}, AddFileForm>, res: Response)
 
 export const getFiles = async (req: Request, res: Response) => {
     try {
-        const { types = [], searchText = '', sort = 'createdAt-desc', limit, email, ownerId } = req.query as any;
+        let { types = [], searchText = '', sort = 'createdAt-desc', limit, email, ownerId } = req.query as any;
 
         const query: any = {
             $or: [
@@ -50,6 +52,7 @@ export const getFiles = async (req: Request, res: Response) => {
             ]
         };
 
+        types = typeof types === 'string' && types.includes(',') ? types.split(',') : types;
         if (types && types.length > 0) {
             query.type = { $in: Array.isArray(types) ? types : [types] };
         }
@@ -65,6 +68,10 @@ export const getFiles = async (req: Request, res: Response) => {
         }
 
         const files = await File.find(query)
+            .populate({
+                path: 'owner',
+                select: 'fullName',
+            })
             .sort(sortObj)
             .limit(limit ? parseInt(limit) : 0);
 
@@ -101,11 +108,11 @@ export const shareFile = async (req: Request, res: Response) => {
         }
 
         const updatedFile = await File.findOneAndUpdate(
-            { bucketFileId },
+            { _id: bucketFileId },
             { $addToSet: { users: { $each: users } } },
             { new: true }
         );
-        res.status(200).json({ message: 'File shared', file: updatedFile });
+        res.status(200).json({ message: 'File shared', updatedFile });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to share file' });
@@ -114,20 +121,19 @@ export const shareFile = async (req: Request, res: Response) => {
 
 export const renameFile = async (req: Request, res: Response) => {
     try {
-        const { bucketFileId, name } = req.body;
-
+        const { bucketFileId, name } = req.body
         if (!bucketFileId || !name) {
             res.status(404).json({ message: 'File not found' });
             return
         }
 
         const updatedFile = await File.findOneAndUpdate(
-            { bucketFileId },
+            { _id: bucketFileId },
             { name },
             { new: true }
         );
 
-        res.status(200).json({ message: 'File renamed', file: updatedFile });
+        res.status(200).json({ message: 'File renamed', updatedFile });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to rename file' });

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -10,15 +9,16 @@ import { Models } from "node-appwrite";
 import Thumbnail from "@/components/Thumbnail";
 import FormattedDateTime from "@/components/FormattedDateTime";
 import { useDebounce } from "use-debounce";
+
 const Search = () => {
   const [query, setQuery] = useState("");
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("query") || "";
-  const [results, setResults] = useState<Models.Document[]>([]);
+  const [results, setResults] = useState<any>([]);
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const path = usePathname();
-  const [debouncedQuery] = useDebounce(query, 300);
+  const [debouncedQuery] = useDebounce(query, 150);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -29,7 +29,7 @@ const Search = () => {
       }
 
       const files = await getFiles({ types: [], searchText: debouncedQuery });
-      setResults(files.documents);
+      setResults(files);
       setOpen(true);
     };
 
@@ -69,11 +69,11 @@ const Search = () => {
 
         {open && (
           <ul className="search-result">
-            {results.length > 0 ? (
-              results.map((file) => (
+            {results?.length > 0 ? (
+              results?.map((file: any) => (
                 <li
                   className="flex items-center justify-between"
-                  key={file.$id}
+                  key={file._id}
                   onClick={() => handleClickItem(file)}
                 >
                   <div className="flex cursor-pointer items-center gap-4">

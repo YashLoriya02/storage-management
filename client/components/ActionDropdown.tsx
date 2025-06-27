@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import Image from "next/image";
-import { Models } from "node-appwrite";
 import { actionsDropdownItems } from "@/constants";
 import Link from "next/link";
 import { constructDownloadUrl } from "@/lib/utils";
@@ -31,13 +30,21 @@ import {
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "@/components/ActionsModalContent";
 
-const ActionDropdown = ({ file }: { file: Models.Document }) => {
+const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
   const [name, setName] = useState(file.name);
   const [isLoading, setIsLoading] = useState(false);
   const [emails, setEmails] = useState<string[]>([]);
+  let newActionsDropdownItems: Array<any> = []
+
+  if (file.owner._id !== sessionId) {
+    newActionsDropdownItems = actionsDropdownItems.filter(d => d.value == 'rename' || d.value === 'download' || d.value === 'details')
+  }
+  else {
+    newActionsDropdownItems = actionsDropdownItems
+  }
 
   const path = usePathname();
 
@@ -56,8 +63,8 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
 
     const actions = {
       rename: () =>
-        renameFile({ fileId: file.$id, name, extension: file.extension, path }),
-      share: () => updateFileUsers({ fileId: file.$id, emails, path }),
+        renameFile({ fileId: file._id, name, path }),
+      share: () => updateFileUsers({ fileId: file._id, emails, path }),
       delete: () =>
         deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path }),
     };
@@ -73,7 +80,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     const updatedEmails = emails.filter((e) => e !== email);
 
     const success = await updateFileUsers({
-      fileId: file.$id,
+      fileId: file._id,
       emails: updatedEmails,
       path,
     });
@@ -154,7 +161,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
             {file.name}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {actionsDropdownItems.map((actionItem) => (
+          {newActionsDropdownItems.map((actionItem) => (
             <DropdownMenuItem
               key={actionItem.value}
               className="shad-dropdown-item"

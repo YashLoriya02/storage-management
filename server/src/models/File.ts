@@ -10,6 +10,7 @@ export interface IFile extends Document {
     accountId: string;
     users: string[];
     bucketFileId: string;
+    bucketId: string;
 }
 
 const FileSchema: Schema = new Schema({
@@ -35,7 +36,7 @@ const FileSchema: Schema = new Schema({
     },
     owner: {
         type: Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
         required: true
     },
     accountId: {
@@ -50,7 +51,15 @@ const FileSchema: Schema = new Schema({
         type: String,
         required: true
     },
-});
+    bucketId: {
+        type: String,
+        required: true
+    },
+},
+    {
+        timestamps: true
+    }
+);
 
 const File = mongoose.model<IFile>('files', FileSchema);
 

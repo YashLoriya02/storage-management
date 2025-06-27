@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Search from "@/components/Search";
 import FileUploader from "@/components/FileUploader";
-// import { signOutUser } from "@/lib/actions/user.actions";
+import Cookies from "js-cookie";
 
 const Header = ({
   userId,
@@ -20,8 +20,8 @@ const Header = ({
         <form>
           <Button
             onClick={() => {
-              localStorage.removeItem('session_id')
-              localStorage.removeItem('token')
+              Cookies.remove('session_id')
+              Cookies.remove('token')
             }}
             type="submit"
             className="sign-out-button"

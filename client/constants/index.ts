@@ -26,7 +26,7 @@ export const navItems = [
   },
 ];
 
-export const actionsDropdownItems = [
+export let actionsDropdownItems = [
   {
     label: "Rename",
     icon: "/assets/icons/edit.svg",
@@ -65,11 +65,11 @@ export const sortTypes = [
   },
   {
     label: "Name (A-Z)",
-    value: "name-asc",
+    value: "name-desc",
   },
   {
     label: "Name (Z-A)",
-    value: "name-desc",
+    value: "name-asc",
   },
   {
     label: "Size (Highest)",
