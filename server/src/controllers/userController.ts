@@ -87,7 +87,7 @@ export const sendOTP = async (req: Request<{}, {}, { email: string }>, res: Resp
             html: `
 <div style="font-family: Arial, sans-serif; background-color: #ffffff; padding: 5px 30px; border-radius: 10px; max-width: 520px; margin: auto; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
           <h2 style="text-align: center; color: #EA6365; margin-bottom: 20px;">🔐 OTP Verification</h2>
-          <p style="font-size: 16px; color: #444;">Hi there 👋,</p>
+          <p style="font-size: 16px; color: #444;">Hi there,</p>
           <p style="font-size: 16px; color: #444;">We received a login request for your StoreIt account.</p>
           <p style="font-size: 16px; color: #444;">Please enter the following One-Time Password (OTP) to proceed:</p>
           <div style="font-size: 36px; font-weight: bold; color: #EA6365; text-align: center; margin: 20px 0; letter-spacing: 6px;">${otp}</div>

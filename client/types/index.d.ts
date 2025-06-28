@@ -30,8 +30,14 @@ declare interface RenameFileProps {
   name: string;
   path: string;
 }
+declare interface ShareAccessFileProps {
+  owner: string;
+  email: string;
+  url: string;
+  name: string;
+}
 declare interface UpdateFileUsersProps {
-  fileId: string;
+  file: any;
   emails: string[];
   path: string;
 }

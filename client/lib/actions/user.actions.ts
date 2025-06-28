@@ -11,7 +11,7 @@ const handleError = (error: unknown, message: string) => {
 
 const getUserByEmail = async (email: string) => {
   try {
-    const response = await fetch('http://localhost:5000/api/users/getUserByEmail', {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/getUserByEmail`, {
       method: "POST",
       headers: {
         'Content-type': 'application/json'
@@ -34,7 +34,7 @@ const getUserByEmail = async (email: string) => {
 
 export const sendEmailOTP = async ({ email }: { email: string }) => {
   try {
-    await fetch('http://localhost:5000/api/users/sendOTP', {
+    await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/sendOTP`, {
       method: "POST",
       headers: {
         'Content-type': 'application/json'
@@ -57,7 +57,7 @@ export const createAccount = async ({
 
   if (!existingUser) {
     try {
-      const res = await fetch('http://localhost:5000/api/users/register', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/register`, {
         method: "POST",
         headers: {
           'Content-type': 'application/json'
@@ -87,7 +87,7 @@ export const verifySecret = async ({
   otp: string;
 }) => {
   try {
-    const res = await fetch('http://localhost:5000/api/users/login', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/login`, {
       method: "POST",
       headers: {
         'Content-type': 'application/json'
@@ -111,7 +111,7 @@ export const getCurrentUser = async () => {
       return null
     }
 
-    const res = await fetch(`http://localhost:5000/api/users/currentUser/${session_id}`)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/users/currentUser/${session_id}`)
 
     if (res.ok) {
       const data = await res.json()

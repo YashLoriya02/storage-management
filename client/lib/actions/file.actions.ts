@@ -43,7 +43,7 @@ export const uploadFile = async ({
       bucketId: bucketFile.bucketId,
     };
 
-    const res = await fetch('http://localhost:5000/api/files/addFiles', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/addFiles`, {
       method: "POST",
       headers: {
         'Content-Type': "application/json"
@@ -74,7 +74,7 @@ export const getFiles = async ({
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User not found");
 
-    const res = await fetch(`http://localhost:5000/api/files/getFiles?ownerId=${currentUser._id}&types=${types}&sort=${sort}&limit=${limit}&searchText=${searchText}&email=${currentUser.email}`)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/getFiles?ownerId=${currentUser._id}&types=${types}&sort=${sort}&limit=${limit}&searchText=${searchText}&email=${currentUser.email}`)
 
     if (res.ok) {
       const files = await res.json()
@@ -94,7 +94,7 @@ export const renameFile = async ({
 }: RenameFileProps) => {
   try {
 
-    const res = await fetch('http://localhost:5000/api/files/renameFile', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/renameFile`, {
       method: "POST",
       headers: {
         'Content-Type': "application/json"
@@ -113,25 +113,45 @@ export const renameFile = async ({
   }
 };
 
-export const updateFileUsers = async ({
-  fileId,
-  emails,
-  path,
-}: UpdateFileUsersProps) => {
+const fileShareAccessEmail = async ({
+  owner,
+  email,
+  url,
+  name
+}: ShareAccessFileProps) => {
   try {
-    const res = await fetch('http://localhost:5000/api/files/shareFile', {
+    await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/fileShareAccessEmail`, {
       method: "POST",
       headers: {
         'Content-Type': "application/json"
       },
-      body: JSON.stringify({ bucketFileId: fileId, users: emails })
+      body: JSON.stringify({ owner, email, url, name })
+    })
+
+  } catch (error) {
+    handleError(error, "Failed to rename file");
+  }
+};
+
+export const updateFileUsers = async ({
+  file,
+  emails,
+  path,
+}: UpdateFileUsersProps) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/shareFile`, {
+      method: "POST",
+      headers: {
+        'Content-Type': "application/json"
+      },
+      body: JSON.stringify({ bucketFileId: file._id, users: emails })
     })
 
     const data = await res.json()
-    console.log(data)
 
     if (res.ok) {
       revalidatePath(path);
+      fileShareAccessEmail({ owner: file.owner, email: emails[0], url: file.url, name: file.name })
       return parseStringify(data.updatedFile);
     }
   } catch (error) {
@@ -146,7 +166,7 @@ export const deleteFile = async ({
   const { storage } = await createAdminClient();
 
   try {
-    const res = await fetch('http://localhost:5000/api/files/deleteFile', {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/deleteFile`, {
       method: "POST",
       headers: {
         'Content-Type': "application/json"
@@ -172,7 +192,7 @@ export async function getTotalSpaceUsed() {
     const currentUser = await getCurrentUser();
     if (!currentUser) throw new Error("User is not authenticated.");
 
-    const res = await fetch(`http://localhost:5000/api/files/getFiles?ownerId=${currentUser._id}`)
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/getFiles?ownerId=${currentUser._id}`)
 
     if (res.ok) {
       const files = await res.json()

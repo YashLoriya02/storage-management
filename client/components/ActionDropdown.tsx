@@ -64,7 +64,7 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
     const actions = {
       rename: () =>
         renameFile({ fileId: file._id, name, path }),
-      share: () => updateFileUsers({ fileId: file._id, emails, path }),
+      share: () => updateFileUsers({ file, emails, path }),
       delete: () =>
         deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path }),
     };
@@ -80,7 +80,7 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
     const updatedEmails = emails.filter((e) => e !== email);
 
     const success = await updateFileUsers({
-      fileId: file._id,
+      file,
       emails: updatedEmails,
       path,
     });
