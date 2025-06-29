@@ -155,3 +155,11 @@ storage-management/
 *  File storage security via Appwrite with restricted bucket permissions
 *  MongoDB for access control and user management
 *  Role-based sharing to control read/write/delete/share access
+
+---
+
+##  📸 Screenshots
+
+*  ![Home Page](image-1.png)
+*  ![Images Section (Type based Filtering)](image-2.png)
+*  ![Share File](image.png)
