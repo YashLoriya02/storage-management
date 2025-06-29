@@ -79,23 +79,23 @@ cd storage-management
 
 ```bash
 # Frontend (Next.js)
-cd frontend
-npm install
+cd client
+npm i
 
 # Backend (Express)
-cd ../backend
-npm install
+cd ../server
+npm i
 ```
 
 3. **Configure Environment Variables:**
 
-Create `.env.local` for the frontend and `.env` for the backend as shown below.
+Create `.env.local` for the client and `.env` for the server as shown below.
 
 ---
 
 ##  Environment Variables Setup
 
-###  Frontend (`/frontend/.env.local`):
+###  Frontend (`/client/.env.local`):
 
 ```env
 NEXT_PUBLIC_API_ENDPOINT=http://localhost:5000/api
@@ -111,7 +111,7 @@ NEXT_APPWRITE_KEY=your-appwrite-api-key
 
 ---
 
-###  Backend (`/backend/.env`):
+###  Backend (`/server/.env`):
 
 ```env
 MONGO_URI=your_mongo_uri
@@ -126,14 +126,14 @@ PORT=5000
 4. **Run the Backend:**
 
 ```bash
-cd backend
+cd server
 npm run dev
 ```
 
 5. **Run the Frontend:**
 
 ```bash
-cd frontend
+cd client
 npm run dev
 ```
 
@@ -142,9 +142,9 @@ npm run dev
 ##  Folder Structure (High-level)
 
 ```
-storeit/
-├── frontend/   (Next.js + Tailwind + ShadCN UI)
-└── backend/    (Express + MongoDB)
+storage-management/
+├── client/   (Next.js + Tailwind + ShadCN UI)
+└── server/    (Express + MongoDB)
 ```
 
 ---
