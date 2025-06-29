@@ -162,6 +162,6 @@ storage-management/
 
 ![Home Page](client/snapshots/image-3.png)
 
-![Images Section (Type based Filtering)](client/snapshots/image-2.png)
+![Documents Section (Type based Filtering)](image2.png)
 
 ![Share File](client/snapshots/image.png)
