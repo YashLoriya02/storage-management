@@ -13,6 +13,21 @@ export interface IFile extends Document {
     bucketId: string;
 }
 
+const FileUserSchema = new Schema(
+    {
+        email: {
+            type: String,
+            required: true
+        },
+        accessType: {
+            type: String,
+            enum: ['r', 'wr', 'wrs', 'all'],
+            required: true
+        }
+    },
+    { timestamps: true }
+);
+
 const FileSchema: Schema = new Schema({
     type: {
         type: String,
@@ -44,8 +59,8 @@ const FileSchema: Schema = new Schema({
         required: true
     },
     users: {
-        type: [String]
-        , default: []
+        type: [FileUserSchema],
+        default: []
     },
     bucketFileId: {
         type: String,

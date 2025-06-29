@@ -63,8 +63,6 @@ const AuthForm = ({ type }: { type: FormType }) => {
           })
           : await signInUser({ email: values.email });
 
-      console.log(userAccountId)
-
       if (userAccountId) {
         setAccountId(userAccountId);
       }

@@ -65,9 +65,9 @@ const Sidebar = ({ fullName, avatar, email }: Props) => {
       <Image
         src="/assets/images/files-2.png"
         alt="logo"
-        width={406}
-        height={318}
-        className="w-full"
+        width={106}
+        height={118}
+        className="w-[90%] mx-auto"
       />
 
       <div className="sidebar-user-info">

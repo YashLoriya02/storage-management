@@ -50,7 +50,7 @@ export const getFiles = async (req: Request, res: Response) => {
         const query: any = {
             $or: [
                 { owner: ownerId },
-                { users: { $in: [email] } },
+                { "users.email": email }
             ]
         };
 
@@ -102,10 +102,21 @@ export const deleteFile = async (req: Request, res: Response) => {
 
 export const shareFile = async (req: Request, res: Response) => {
     try {
-        const { bucketFileId, users } = req.body;
+        const { bucketFileId, users, isRemove } = req.body;
 
-        if (!bucketFileId || !users || users.length === 0) {
+        if (!bucketFileId || !users) {
             res.status(404).json({ message: 'Necessary data not passed' });
+            return
+        }
+
+        if (isRemove) {
+            const updatedFile = await File.findOneAndUpdate(
+                { _id: bucketFileId },
+                { $set: { users } },
+                { new: true }
+            );
+
+            res.status(200).json({ message: 'File share list updated', updatedFile });
             return
         }
 
@@ -114,6 +125,7 @@ export const shareFile = async (req: Request, res: Response) => {
             { $addToSet: { users: { $each: users } } },
             { new: true }
         );
+
         res.status(200).json({ message: 'File shared', updatedFile });
     } catch (error) {
         console.error(error);
@@ -143,11 +155,11 @@ export const renameFile = async (req: Request, res: Response) => {
 };
 
 export const fileShareAccessEmail = async (
-    req: Request<{}, {}, { owner: any; email: string; url: string; name: string }>,
+    req: Request<{}, {}, { owner: any; email: string; accessType: string; url: string; name: string }>,
     res: Response
 ) => {
     try {
-        const { owner, email, url, name } = req.body;
+        const { owner, email, url, name, accessType } = req.body;
 
         if (!owner || !email || !url || !name) {
             res.status(400).json({ error: 'owner, email, url, and name are required' });
@@ -160,11 +172,6 @@ export const fileShareAccessEmail = async (
                 fetch(url)
             ]
         );
-
-        if (!user) {
-            res.status(404).json({ error: 'User not found' });
-            return
-        }
 
         const arrayBuffer = await fileResponse.arrayBuffer();
         const fileBuffer = Buffer.from(arrayBuffer);
@@ -179,12 +186,12 @@ export const fileShareAccessEmail = async (
 
         const mailOptions = {
             from: `StoreIt <${process.env.EMAIL_FROM}>`,
-            to: user.email,
+            to: user?.email ?? email,
             subject: `📁 ${name} - File Access Granted by ${owner.fullName}`,
             html: `
         <div style="font-family: Arial, sans-serif; background-color: #ffffff; padding: 20px 30px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
           <h2 style="text-align: center; color: #4CAF50;">✅ File Access Granted</h2>
-          <p>Hi ${user.fullName || 'there'},</p>
+          <p>Hi ${user?.fullName || 'there'},</p>
           <p><strong>${owner.fullName}</strong> has shared a file with you on <strong>StoreIt</strong>.</p>
           <p><strong>File Name:</strong> ${name}</p>
           <p>You can open the file using this link: <a href="${url}" target="_blank">${url}</a></p>

@@ -173,7 +173,6 @@ export const getFileIcon = (
 };
 
 // APPWRITE URL UTILS
-// Construct appwrite file URL - https://appwrite.io/docs/apis/rest#images
 export const constructFileUrl = (bucketFileId: string) => {
   return `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_APPWRITE_BUCKET}/files/${bucketFileId}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}`;
 };
@@ -181,6 +180,18 @@ export const constructFileUrl = (bucketFileId: string) => {
 export const constructDownloadUrl = (bucketFileId: string) => {
   return `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_APPWRITE_BUCKET}/files/${bucketFileId}/download?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}`;
 };
+
+// Access types while sharing files
+export const ACCESS_TYPES = [
+  { label: "Read Only", value: "r" },
+  { label: "Write + Read", value: "wr" },
+  { label: "Write + Read + Share", value: "wrs" },
+  { label: "Full Access", value: "all" },
+];
+
+export const getAccessType = (val: string) => {
+  return ACCESS_TYPES.find(v => v.value == val)?.label
+}
 
 // DASHBOARD UTILS
 export const getUsageSummary = (totalSpace: any) => {

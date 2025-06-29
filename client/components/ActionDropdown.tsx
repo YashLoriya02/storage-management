@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { actionsDropdownItems } from "@/constants";
 import Link from "next/link";
@@ -29,6 +29,8 @@ import {
 } from "@/lib/actions/file.actions";
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "@/components/ActionsModalContent";
+import { useToast } from "@/hooks/use-toast";
+import { getCurrentUser } from "@/lib/actions/user.actions";
 
 const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,24 +38,65 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
   const [action, setAction] = useState<ActionType | null>(null);
   const [name, setName] = useState(file.name);
   const [isLoading, setIsLoading] = useState(false);
-  const [emails, setEmails] = useState<string[]>([]);
-  let newActionsDropdownItems: Array<any> = []
+  const [emails, setEmails] = useState<{ email: string; accessType: string }[]>([]);
+  const [newActionsDropdownItems, setNewActionsDropdownItems] = useState<Array<any>>([]);
 
-  if (file.owner._id !== sessionId) {
-    newActionsDropdownItems = actionsDropdownItems.filter(d => d.value == 'rename' || d.value === 'download' || d.value === 'details')
-  }
-  else {
-    newActionsDropdownItems = actionsDropdownItems
-  }
-
+  const { toast } = useToast()
   const path = usePathname();
+
+  useEffect(() => {
+    getCurrentUserInfo();
+  }, []);
+
+  const getCurrentUserInfo = async () => {
+    const currentUser = await getCurrentUser();
+
+    if (file.owner._id !== sessionId && currentUser?.email) {
+      const currentUserAccess = file.users.find((f: any) => f.email === currentUser.email);
+
+      if (currentUserAccess) {
+        switch (currentUserAccess.accessType) {
+          case "r":
+            const customActionsDropdownItemsR = actionsDropdownItems.filter(
+              (d) => d.value === "download" || d.value === "details"
+            );
+            setNewActionsDropdownItems(customActionsDropdownItemsR)
+            break;
+          case "wr":
+            const customActionsDropdownItemsWR = actionsDropdownItems.filter(
+              (d) =>
+                d.value === "rename" ||
+                d.value === "download" ||
+                d.value === "details"
+            );
+            setNewActionsDropdownItems(customActionsDropdownItemsWR)
+            break;
+          case "wrs":
+            const customActionsDropdownItemsWRS = actionsDropdownItems.filter(
+              (d) =>
+                d.value === "rename" ||
+                d.value === "download" ||
+                d.value === "details" ||
+                d.value === "share"
+            );
+            setNewActionsDropdownItems(customActionsDropdownItemsWRS)
+            break;
+          default:
+            setNewActionsDropdownItems(actionsDropdownItems)
+            break;
+        }
+      }
+    }
+    else {
+      setNewActionsDropdownItems(actionsDropdownItems)
+    }
+  };
 
   const closeAllModals = () => {
     setIsModalOpen(false);
     setIsDropdownOpen(false);
     setAction(null);
     setName(file.name);
-    //   setEmails([]);
   };
 
   const handleAction = async () => {
@@ -62,31 +105,62 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
     let success = false;
 
     const actions = {
-      rename: () =>
-        renameFile({ fileId: file._id, name, path }),
-      share: () => updateFileUsers({ file, emails, path }),
+      rename: async () => {
+        await renameFile({ fileId: file._id, name, path })
+        return toast({
+          description: (
+            <p className="body-2 text-white">
+              <span className="font-semibold">{file.name}</span> is renamed successfully.
+            </p>
+          ),
+          className: "error-toast",
+        });
+      },
+      share: async () => {
+        await updateFileUsers({ file, emails, path })
+        return toast({
+          description: (
+            <p className="body-2 text-white">
+              <span className="font-semibold">{file.name}</span> shared with {emails[0].email} successfully.
+            </p>
+          ),
+          className: "error-toast",
+        });
+      },
       delete: () =>
-        deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path }),
+        deleteFile({ fileId: file._id, bucketFileId: file.bucketFileId, path }),
     };
 
     success = await actions[action.value as keyof typeof actions]();
-
     if (success) closeAllModals();
 
     setIsLoading(false);
   };
 
   const handleRemoveUser = async (email: string) => {
-    const updatedEmails = emails.filter((e) => e !== email);
+    const updatedEmails = file.users.filter((e: any) => e.email !== email);
+    const removedEmail = file.users.find((e: any) => e.email === email);
 
     const success = await updateFileUsers({
       file,
       emails: updatedEmails,
       path,
+      isRemove: true
     });
 
-    if (success) setEmails(updatedEmails);
-    closeAllModals();
+    if (success) {
+      setEmails(updatedEmails)
+      closeAllModals();
+
+      return toast({
+        description: (
+          <p className="body-2 text-white">
+            <span className="font-semibold">{removedEmail.email}</span> has been removed from file access.
+          </p>
+        ),
+        className: "error-toast",
+      });
+    };
   };
 
   const renderDialogContent = () => {
@@ -211,4 +285,5 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
     </Dialog>
   );
 };
+
 export default ActionDropdown;

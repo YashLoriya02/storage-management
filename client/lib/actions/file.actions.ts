@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/appwrite";
 import { appwriteConfig } from "@/lib/appwrite/config";
 import { constructFileUrl, getFileType, parseStringify } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
-import { ID, Query } from "node-appwrite";
+import { ID } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 
 const handleError = (error: unknown, message: string) => {
@@ -118,7 +118,7 @@ const fileShareAccessEmail = async ({
   email,
   url,
   name
-}: ShareAccessFileProps) => {
+}: ShareAccessFileEmailProps) => {
   try {
     await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/fileShareAccessEmail`, {
       method: "POST",
@@ -137,6 +137,7 @@ export const updateFileUsers = async ({
   file,
   emails,
   path,
+  isRemove,
 }: UpdateFileUsersProps) => {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/shareFile`, {
@@ -144,14 +145,18 @@ export const updateFileUsers = async ({
       headers: {
         'Content-Type': "application/json"
       },
-      body: JSON.stringify({ bucketFileId: file._id, users: emails })
+      body: JSON.stringify({ bucketFileId: file._id, users: emails, isRemove })
     })
 
     const data = await res.json()
+    console.log(data)
 
     if (res.ok) {
       revalidatePath(path);
-      fileShareAccessEmail({ owner: file.owner, email: emails[0], url: file.url, name: file.name })
+      if (!isRemove) {
+        fileShareAccessEmail({ owner: file.owner, email: emails[0].email, url: file.url, name: file.name })
+      }
+
       return parseStringify(data.updatedFile);
     }
   } catch (error) {

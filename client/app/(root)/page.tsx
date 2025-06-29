@@ -18,8 +18,6 @@ const Dashboard = async () => {
   const usageSummary = getUsageSummary(totalSpace);
   const temp = (await cookies()).get("session_id")
 
-  console.log(totalSpace.used)
-
   return (
     <div className="dashboard-container">
       <section>

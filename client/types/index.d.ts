@@ -30,7 +30,7 @@ declare interface RenameFileProps {
   name: string;
   path: string;
 }
-declare interface ShareAccessFileProps {
+declare interface ShareAccessFileEmailProps {
   owner: string;
   email: string;
   url: string;
@@ -38,8 +38,9 @@ declare interface ShareAccessFileProps {
 }
 declare interface UpdateFileUsersProps {
   file: any;
-  emails: string[];
+  emails: { email: string; accessType: string }[];
   path: string;
+  isRemove?: Boolean;
 }
 declare interface DeleteFileProps {
   fileId: string;
@@ -77,5 +78,11 @@ declare interface ThumbnailProps {
 declare interface ShareInputProps {
   file: Models.Document;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemove: (email: string) => void;
+}
+
+declare interface Props {
+  file: any,
+  onInputChange: (emailsWithAccess: { email: string; accessType: string }[]) => void;
   onRemove: (email: string) => void;
 }
