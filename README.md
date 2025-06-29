@@ -160,6 +160,8 @@ storage-management/
 
 ##  📸 Screenshots
 
-![Home Page](image-3.png)
-![Images Section (Type based Filtering)](image-2.png)
-![Share File](image.png)
+![Home Page](client/snapshots/image-3.png)
+
+![Images Section (Type based Filtering)](client/snapshots/image-2.png)
+
+![Share File](client/snapshots/image.png)
