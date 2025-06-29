@@ -10,7 +10,6 @@ const Page = async ({ searchParams, params }: SearchParamProps) => {
   const sort = ((await searchParams)?.sort as string) || "";
 
   const types = getFileTypesParams(type) as FileType[];
-
   const files = await getFiles({ types, searchText, sort });
 
   const totalSize: number = files.reduce((sum: number, file: any) => sum + file.size, 0);

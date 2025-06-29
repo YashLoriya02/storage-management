@@ -107,7 +107,7 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
     const actions = {
       rename: async () => {
         await renameFile({ fileId: file._id, name, path })
-        return toast({
+        toast({
           description: (
             <p className="body-2 text-white">
               <span className="font-semibold">{file.name}</span> is renamed successfully.
@@ -115,10 +115,12 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
           ),
           className: "error-toast",
         });
+
+        return true
       },
       share: async () => {
         await updateFileUsers({ file, emails, path })
-        return toast({
+        toast({
           description: (
             <p className="body-2 text-white">
               <span className="font-semibold">{file.name}</span> shared with {emails[0].email} successfully.
@@ -126,9 +128,22 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
           ),
           className: "error-toast",
         });
+
+        return true
       },
-      delete: () =>
-        deleteFile({ fileId: file._id, bucketFileId: file.bucketFileId, path }),
+      delete: async () => {
+        await deleteFile({ fileId: file._id, bucketFileId: file.bucketFileId, path })
+        toast({
+          description: (
+            <p className="body-2 text-white">
+              <span className="font-semibold">{file.name}</span> deleted successfully.
+            </p>
+          ),
+          className: "error-toast",
+        });
+
+        return true
+      }
     };
 
     success = await actions[action.value as keyof typeof actions]();

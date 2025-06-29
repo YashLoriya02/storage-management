@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import Image from "next/image";
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Separator } from "@radix-ui/react-separator";
 import { navItems } from "@/constants";
 import Link from "next/link";
@@ -34,6 +34,7 @@ const MobileNavigation = ({
 }: Props) => {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <header className="mobile-header">
@@ -109,6 +110,7 @@ const MobileNavigation = ({
               onClick={() => {
                 Cookies.remove('session_id')
                 Cookies.remove('token')
+                router.push('/')
               }}
             >
               <Image

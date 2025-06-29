@@ -50,7 +50,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
               setFiles((prevFiles) =>
                 prevFiles.filter((f) => f.name !== file.name),
               );
-              
+
             }
           },
         );
@@ -61,7 +61,7 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
     [ownerId, accountId, path],
   );
 
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   const handleRemoveFile = (
     e: React.MouseEvent<HTMLImageElement, MouseEvent>,
@@ -72,16 +72,21 @@ const FileUploader = ({ ownerId, accountId, className }: Props) => {
   };
 
   return (
-    <div {...getRootProps()} className="cursor-pointer">
+    // <div {...getRootProps()} className="cursor-pointer">
+    <div {...getRootProps()} className={cn(
+      "cursor-pointer border-2 border-dashed rounded-lg p-2 transition-colors duration-200",
+      isDragActive ? "border-primary" : "border-white",
+      className
+    )}>
       <input {...getInputProps()} />
-      <Button type="button" className={cn("uploader-button", className)}>
+      <Button type="button" className={cn("", isDragActive ? "!bg-[#1d1d94ad] h-[52px] gap-2 px-10 shadow-drop-1" : "uploader-button", className)}>
         <Image
           src="/assets/icons/upload.svg"
           alt="upload"
           width={24}
           height={24}
         />{" "}
-        <p>Upload</p>
+        <p>{isDragActive ? "Drop here" : "Upload"}</p>
       </Button>
       {files.length > 0 && (
         <ul className="uploader-preview-list">
