@@ -13,6 +13,29 @@ const handleError = (error: unknown, message: string) => {
   throw error;
 };
 
+const generateAndSaveKeywords = async (file: any, fileId: string): Promise<string[] | undefined> => {
+  const formData = new FormData()
+
+  formData.append('file', file);
+  formData.append('fileId', fileId);
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/generateKeywords`, {
+      method: "POST",
+      body: formData
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.log(errorData?.error || 'Failed to generate keywords');
+      return []
+    }
+
+  } catch (error) {
+    console.log("Error while generating keywords: ", error)
+    return []
+  }
+}
+
 export const uploadFile = async ({
   file,
   ownerId,
@@ -52,6 +75,11 @@ export const uploadFile = async ({
     })
 
     if (res.ok) {
+      const data = await res.json()
+      console.log(data)
+
+      generateAndSaveKeywords(inputFile, data.file._id)
+
       revalidatePath(path);
       return parseStringify({ success: true });
     }
@@ -149,7 +177,6 @@ export const updateFileUsers = async ({
     })
 
     const data = await res.json()
-    console.log(data)
 
     if (res.ok) {
       revalidatePath(path);

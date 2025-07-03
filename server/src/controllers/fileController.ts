@@ -2,8 +2,11 @@ import { Request, Response } from 'express';
 import File from '../models/File';
 import mongoose from 'mongoose';
 import { UUID } from 'crypto';
+import fs from 'fs/promises';
 import User from '../models/User';
 import nodemailer from 'nodemailer';
+import { extractTextFromFile } from '../utils/extractContentFromFile';
+import { extractKeywordsFromText } from '../utils/llmKeywordsExtraction';
 
 interface AddFileForm {
     type: string,
@@ -47,20 +50,35 @@ export const getFiles = async (req: Request, res: Response) => {
     try {
         let { types = [], searchText = '', sort = 'createdAt-desc', limit, email, ownerId } = req.query as any;
 
-        const query: any = {
-            $or: [
-                { owner: ownerId },
-                { "users.email": email }
-            ]
-        };
-
         types = typeof types === 'string' && types.includes(',') ? types.split(',') : types;
-        if (types && types.length > 0) {
-            query.type = { $in: Array.isArray(types) ? types : [types] };
+
+        const accessOr = [
+            { owner: ownerId },
+            { "users.email": email }
+        ];
+
+        let searchOr: any[] = [];
+        if (searchText) {
+            searchOr = [
+                { name: { $regex: searchText, $options: 'i' } },
+                { keywords: { $elemMatch: { $regex: searchText, $options: 'i' } } }
+            ];
         }
 
+        let finalQuery: any = {};
         if (searchText) {
-            query.name = { $regex: searchText, $options: 'i' };
+            finalQuery = {
+                $and: [
+                    { $or: accessOr },
+                    { $or: searchOr }
+                ]
+            };
+        } else {
+            finalQuery = { $or: accessOr };
+        }
+
+        if (types && types.length > 0) {
+            finalQuery.type = { $in: Array.isArray(types) ? types : [types] };
         }
 
         const sortObj: any = {};
@@ -69,7 +87,7 @@ export const getFiles = async (req: Request, res: Response) => {
             sortObj[sortBy === '$createdAt' ? 'createdAt' : sortBy] = orderBy === 'asc' ? 1 : -1;
         }
 
-        const files = await File.find(query)
+        const files = await File.find(finalQuery)
             .populate({
                 path: 'owner',
                 select: 'fullName',
@@ -83,6 +101,7 @@ export const getFiles = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to fetch files' });
     }
 };
+
 
 export const deleteFile = async (req: Request, res: Response) => {
     try {
@@ -223,5 +242,43 @@ export const fileShareAccessEmail = async (
         console.error('Email Sending Error:', error);
         res.status(500).json({ error: 'Failed to send file access email with attachment' });
         return
+    }
+};
+
+export const generateKeywords = async (
+    req: Request<{}, {}, { fileId: string }>,
+    res: Response
+) => {
+    if (!req.file) {
+        res.status(400).json({ error: "No file uploaded" });
+        return
+    }
+
+    const file = req.file;
+    const { fileId } = req.body;
+    const filePath = file.path;
+
+    try {
+        const ext = file.originalname.split('.').pop()?.toLowerCase();
+
+        const text = await extractTextFromFile(filePath, file.mimetype, ext ?? "");
+        if (!text.trim()) {
+            await fs.unlink(filePath).catch(() => { });
+            res.status(400).json({ message: "Text not found", keywords: [] });
+            return
+        }
+
+        const keywords = await extractKeywordsFromText(text, 20, file.filename);
+
+        const [_, __] = await Promise.all([
+            fs.unlink(filePath),
+            File.findByIdAndUpdate(fileId, { keywords })
+        ])
+
+        res.status(200).json({ keywords });
+    } catch (error) {
+        console.error("Keyword Extraction Error:", error);
+        await fs.unlink(filePath).catch(() => { });
+        res.status(500).json({ error: "Failed to extract keywords" });
     }
 };

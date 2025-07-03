@@ -11,6 +11,7 @@ export interface IFile extends Document {
     users: string[];
     bucketFileId: string;
     bucketId: string;
+    keywords: string[];
 }
 
 const FileUserSchema = new Schema(
@@ -44,6 +45,10 @@ const FileSchema: Schema = new Schema({
     extension: {
         type: String,
         required: true
+    },
+    keywords: {
+        type: [String],
+        default: []
     },
     size: {
         type: Number,
