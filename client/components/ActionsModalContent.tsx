@@ -241,8 +241,19 @@ export const Forward = ({ file }: { file: any }) => {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between bg-neutral-700 rounded-xl px-4 py-2 mb-1">
+      <div className="hidden md:flex items-center justify-between bg-neutral-700 rounded-xl px-4 py-2 mb-1">
         <span title={file.url} className="text-wrap text-sm text-white">{file.url.substring(0, 38)}...</span>
+        <button
+          aria-label="Copy link"
+          onClick={copyUrl}
+          className="ml-3 text-neutral-200"
+        >
+          {copied ? <Check className="h-5 w-5" /> : <Copy className="w-5 h-5" />}
+        </button>
+      </div>
+
+      <div className="flex md:hidden items-center justify-between bg-neutral-700 rounded-xl px-4 py-2 mb-1">
+        <span title={file.url} className="text-wrap text-sm text-white">{file.url.substring(0, 28)}...</span>
         <button
           aria-label="Copy link"
           onClick={copyUrl}

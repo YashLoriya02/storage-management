@@ -63,6 +63,20 @@ const AuthForm = ({ type }: { type: FormType }) => {
           })
           : await signInUser({ email: values.email });
 
+      console.log(userAccountId)
+
+      if (userAccountId?.error === 'User not found') {
+        router.push('/sign-up');
+        
+        toast({
+          description: (
+            <p className="body-2 text-white">User not found, kindly signup</p>
+          ),
+          className: "error-toast",
+        });
+        
+        return
+      }
       if (userAccountId) {
         setAccountId(userAccountId);
       }
