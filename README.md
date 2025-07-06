@@ -1,7 +1,3 @@
-Here’s an updated version of your README with the new features:
-
----
-
 # 📂 StoreIt – Secure Cloud Storage Manager
 
 A fully responsive, role-based cloud storage management system where users can **securely store, manage, and share files with granular access control**.
