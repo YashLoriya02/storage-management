@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addFiles, getFiles, deleteFile, shareFile, renameFile, fileShareAccessEmail, generateKeywords } from '../controllers/fileController';
+import { addFiles, getFiles, deleteFile, shareFile, renameFile, fileShareAccessEmail, generateKeywords, addCustomKeywords } from '../controllers/fileController';
 import multer from 'multer';
 
 const router = Router();
@@ -13,5 +13,6 @@ router.post('/shareFile', shareFile);
 router.post('/renameFile', renameFile);
 router.post('/generateKeywords', upload.single("file"), generateKeywords);
 router.post('/fileShareAccessEmail', fileShareAccessEmail);
+router.post('/addCustomKeywords', addCustomKeywords);
 
 export default router;

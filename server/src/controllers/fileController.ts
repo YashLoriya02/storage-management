@@ -173,6 +173,27 @@ export const renameFile = async (req: Request, res: Response) => {
     }
 };
 
+export const addCustomKeywords = async (req: Request, res: Response) => {
+    try {
+        const { bucketFileId, keywords } = req.body
+        if (!bucketFileId || !keywords || keywords.length === 0) {
+            res.status(404).json({ message: 'Necessary fields not passed.' });
+            return
+        }
+
+        const updatedFile = await File.findByIdAndUpdate(
+            bucketFileId,
+            { $addToSet: { keywords: { $each: keywords } } },
+            { new: true }
+        );
+
+        res.status(200).json({ message: 'Keywords added successfully', updatedFile });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to save custom keywords file' });
+    }
+};
+
 export const fileShareAccessEmail = async (
     req: Request<{}, {}, { owner: any; email: string; accessType: string; url: string; name: string }>,
     res: Response

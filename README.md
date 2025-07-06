@@ -1,10 +1,14 @@
+Here’s an updated version of your README with the new features:
+
+---
+
 # 📂 StoreIt – Secure Cloud Storage Manager
 
 A fully responsive, role-based cloud storage management system where users can **securely store, manage, and share files with granular access control**.
 
 ---
 
-##  Features
+## Features
 
 * **OTP-Based Authentication**
 
@@ -28,9 +32,19 @@ A fully responsive, role-based cloud storage management system where users can *
     * `wrs` → **Write + Read + Share**
     * `all` → **Full Access (Write + Read + Delete + Share)**
 
+* **Keyword Generation and Management**
+
+  * **Automatic keyword extraction** from uploaded files using AI (for enhanced search).
+  * **Custom keyword addition**: Add your own tags for every file to improve searchability and organization.
+
+* **Link Forwarding**
+
+  * **Forward file links directly** via other apps using the integrated share menu (supports mobile and web sharing APIs).
+  * **Copy file links** to clipboard with a single click.
+
 * **Global Search**
 
-  * Search for files across all folders and file types.
+  * Search for files across all folders and file types, including via custom and AI-generated keywords.
 
 * **Advanced Sorting Options**
 
@@ -53,7 +67,7 @@ A fully responsive, role-based cloud storage management system where users can *
 
 ---
 
-##  Tech Stack
+## Tech Stack
 
 | Layer          | Technology                                            |
 | -------------- | ----------------------------------------------------- |
@@ -66,7 +80,7 @@ A fully responsive, role-based cloud storage management system where users can *
 
 ---
 
-##  Setup Instructions
+## Setup Instructions
 
 1. **Clone the Repository:**
 
@@ -93,9 +107,9 @@ Create `.env.local` for the client and `.env` for the server as shown below.
 
 ---
 
-##  Environment Variables Setup
+## Environment Variables Setup
 
-###  Frontend (`/client/.env.local`):
+### Frontend (`/client/.env.local`):
 
 ```env
 NEXT_PUBLIC_API_ENDPOINT=http://localhost:5000/api
@@ -111,7 +125,7 @@ NEXT_APPWRITE_KEY=your-appwrite-api-key
 
 ---
 
-###  Backend (`/server/.env`):
+### Backend (`/server/.env`):
 
 ```env
 MONGO_URI=your_mongo_uri
@@ -139,26 +153,26 @@ npm run dev
 
 ---
 
-##  Folder Structure (High-level)
+## Folder Structure (High-level)
 
 ```
 storage-management/
 ├── client/   (Next.js + Tailwind + ShadCN UI)
-└── server/    (Express + MongoDB)
+└── server/   (Express + MongoDB)
 ```
 
 ---
 
-##  Security Notes
+## Security Notes
 
-*  OTP-based authentication
-*  File storage security via Appwrite with restricted bucket permissions
-*  MongoDB for access control and user management
-*  Role-based sharing to control read/write/delete/share access
+* OTP-based authentication
+* File storage security via Appwrite with restricted bucket permissions
+* MongoDB for access control and user management
+* Role-based sharing to control read/write/delete/share access
 
 ---
 
-##  📸 Screenshots
+## 📸 Screenshots
 
 ![Home Page](client/snapshots/image-3.png)
 
