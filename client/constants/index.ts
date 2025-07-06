@@ -28,9 +28,9 @@ export const navItems = [
 
 export let actionsDropdownItems = [
   {
-    label: "Rename",
-    icon: "/assets/icons/edit.svg",
-    value: "rename",
+    label: "Forward Link",
+    icon: "/assets/icons/share.svg",
+    value: "forward",
   },
   {
     label: "Details",
@@ -38,7 +38,17 @@ export let actionsDropdownItems = [
     value: "details",
   },
   {
-    label: "Share",
+    label: "Rename",
+    icon: "/assets/icons/edit.svg",
+    value: "rename",
+  },
+  {
+    label: "Add Keywords",
+    icon: "/assets/icons/download.svg",
+    value: "keywords",
+  },
+  {
+    label: "Share Access",
     icon: "/assets/icons/share.svg",
     value: "share",
   },
@@ -65,11 +75,11 @@ export const sortTypes = [
   },
   {
     label: "Name (A-Z)",
-    value: "name-desc",
+    value: "name-asc",
   },
   {
     label: "Name (Z-A)",
-    value: "name-asc",
+    value: "name-desc",
   },
   {
     label: "Size (Highest)",

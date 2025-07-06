@@ -219,6 +219,30 @@ export const deleteFile = async ({
   }
 };
 
+export const addKeywords = async ({
+  bucketFileId,
+  path,
+  keywords
+}: AddKeywordsProps) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/files/addCustomKeywords`, {
+      method: "POST",
+      headers: {
+        'Content-Type': "application/json"
+      },
+      body: JSON.stringify({ bucketFileId, keywords })
+    })
+
+    if (res.ok) {
+      revalidatePath(path);
+      return parseStringify({ status: "success" });
+    }
+
+  } catch (error) {
+    handleError(error, "Failed to rename file");
+  }
+};
+
 export async function getTotalSpaceUsed() {
   try {
     const currentUser = await getCurrentUser();

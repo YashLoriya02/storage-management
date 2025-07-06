@@ -42,10 +42,17 @@ declare interface UpdateFileUsersProps {
   path: string;
   isRemove?: Boolean;
 }
+
 declare interface DeleteFileProps {
   fileId: string;
   bucketFileId: string;
   path: string;
+}
+
+declare interface AddKeywordsProps {
+  bucketFileId: string;
+  path: string;
+  keywords: string[];
 }
 
 declare interface FileUploaderProps {

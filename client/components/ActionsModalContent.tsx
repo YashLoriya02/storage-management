@@ -5,6 +5,9 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { RWebShare } from "react-web-share";
+import { useToast } from "@/hooks/use-toast";
+import { Check, Copy, TicketPlus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -140,5 +143,126 @@ export const ShareInput = ({ file, onInputChange, onRemove }: Props) => {
         </div>
       </div>
     </>
+  );
+};
+
+export const Keywords = ({ file, onInputChange }: {
+  file: any,
+  onInputChange: (strArr: string[]) => void
+}) => {
+  const [input, setInput] = useState("");
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInput(value);
+
+    const keywords = value
+      .split(",")
+      .map((kw) => kw.trim())
+      .filter((kw) => kw.length > 0);
+
+    onInputChange(keywords);
+  };
+
+  return (
+    <>
+      <ImageThumbnail file={file} />
+
+      <div className="share-wrapper">
+        <div className="mb-2 flex flex-col gap-1">
+          <p className="subtitle-2 pl-1 text-light-100">
+            Add custom keywords to search/filter the file efficiently.
+          </p>
+          <p className="subtitle-2 text-[12px] pl-1 text-light-100">
+            Enter keywords as comma-separated values:<br />
+            <span>e.g Resume, Document, CV, Other keywords</span>
+          </p>
+        </div>
+
+        <Input
+          type="text"
+          placeholder="Enter your custom keywords"
+          value={input}
+          onChange={handleInputChange}
+          className="share-input-field"
+          aria-label="Custom keywords, comma separated"
+        />
+
+        {input && (
+          <div className="mt-2 pl-1 text-xs text-[green]">
+            <span>Preview:&nbsp;</span>
+            {input
+              .split(",")
+              .map((kw) => kw.trim())
+              .filter(Boolean)
+              .map((kw, idx, arr) =>
+                <span key={kw}>
+                  {kw}
+                  {idx < arr.length - 1 ? <span>, </span> : null}
+                </span>
+              )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+export const Forward = ({ file }: { file: any }) => {
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false)
+
+  const copyUrl = () => {
+    navigator.clipboard
+      .writeText(file.url)
+      .then(() => {
+        setCopied(true)
+
+        toast({
+          description: (
+            <p className="body-2 text-white">Link Copied to Clipboard</p>
+          ),
+          className: "error-toast",
+        });
+
+        setTimeout(() => {
+          setCopied(false)
+        }, 3000);
+      })
+      .catch(() => {
+        toast({
+          description: (
+            <p className="body-2 text-white">Could not copy text</p>
+          ),
+          className: "error-toast",
+        });
+      });
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between bg-neutral-700 rounded-xl px-4 py-2 mb-1">
+        <span title={file.url} className="text-wrap text-sm text-white">{file.url.substring(0, 38)}...</span>
+        <button
+          aria-label="Copy link"
+          onClick={copyUrl}
+          className="ml-3 text-neutral-200"
+        >
+          {copied ? <Check className="h-5 w-5" /> : <Copy className="w-5 h-5" />}
+        </button>
+      </div>
+
+      <RWebShare
+        data={{
+          text: `Forward the file link`,
+          url: `${file.url}`,
+          title: "StoreIt",
+        }}
+      >
+        <Button className="modal-submit-button w-full mt-1">
+          <span className="capitalize">Other Options</span>
+        </Button>
+      </RWebShare>
+    </div>
   );
 };

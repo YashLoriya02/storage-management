@@ -23,12 +23,13 @@ import { constructDownloadUrl } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
+  addKeywords,
   deleteFile,
   renameFile,
   updateFileUsers,
 } from "@/lib/actions/file.actions";
 import { usePathname } from "next/navigation";
-import { FileDetails, ShareInput } from "@/components/ActionsModalContent";
+import { FileDetails, Forward, Keywords, ShareInput } from "@/components/ActionsModalContent";
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentUser } from "@/lib/actions/user.actions";
 
@@ -39,6 +40,7 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
   const [name, setName] = useState(file.name);
   const [isLoading, setIsLoading] = useState(false);
   const [emails, setEmails] = useState<{ email: string; accessType: string }[]>([]);
+  const [keywords, setKeywords] = useState<string[]>([]);
   const [newActionsDropdownItems, setNewActionsDropdownItems] = useState<Array<any>>([]);
 
   const { toast } = useToast()
@@ -58,7 +60,7 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
         switch (currentUserAccess.accessType) {
           case "r":
             const customActionsDropdownItemsR = actionsDropdownItems.filter(
-              (d) => d.value === "download" || d.value === "details"
+              (d) => d.value === "download" || d.value === "forward" || d.value === "details"
             );
             setNewActionsDropdownItems(customActionsDropdownItemsR)
             break;
@@ -66,6 +68,8 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
             const customActionsDropdownItemsWR = actionsDropdownItems.filter(
               (d) =>
                 d.value === "rename" ||
+                d.value === "forward" ||
+                d.value === "keywords" ||
                 d.value === "download" ||
                 d.value === "details"
             );
@@ -75,6 +79,8 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
             const customActionsDropdownItemsWRS = actionsDropdownItems.filter(
               (d) =>
                 d.value === "rename" ||
+                d.value === "keywords" ||
+                d.value === "forward" ||
                 d.value === "download" ||
                 d.value === "details" ||
                 d.value === "share"
@@ -143,6 +149,20 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
         });
 
         return true
+      },
+      keywords: async () => {
+        await addKeywords({ bucketFileId: file._id, path, keywords })
+
+        toast({
+          description: (
+            <p className="body-2 text-white">
+              Keywords added successfully.
+            </p>
+          ),
+          className: "error-toast",
+        });
+
+        return true
       }
     };
 
@@ -197,6 +217,7 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
             />
           )}
           {value === "details" && <FileDetails file={file} />}
+          {value === "keywords" && <Keywords file={file} onInputChange={setKeywords} />}
           {value === "share" && (
             <ShareInput
               file={file}
@@ -210,14 +231,19 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
               <span className="delete-file-name">{file.name}</span>?
             </p>
           )}
+          {value === "forward" && (
+            <Forward
+              file={file}
+            />
+          )}
         </DialogHeader>
-        {["rename", "delete", "share"].includes(value) && (
+        {["rename", "delete", "share", "keywords"].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">
             <Button onClick={closeAllModals} className="modal-cancel-button">
               Cancel
             </Button>
             <Button onClick={handleAction} className="modal-submit-button">
-              <p className="capitalize">{value}</p>
+              <p className="capitalize">{value === "keywords" ? "Submit" : value}</p>
               {isLoading && (
                 <Image
                   src="/assets/icons/loader.svg"
@@ -258,7 +284,7 @@ const ActionDropdown = ({ sessionId, file }: { sessionId: string, file: any }) =
                 setAction(actionItem);
 
                 if (
-                  ["rename", "share", "delete", "details"].includes(
+                  !["download"].includes(
                     actionItem.value,
                   )
                 ) {
